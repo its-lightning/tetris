@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Tetris</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Tetris Game</h1>
+        
+        {% if not session.get('user_id') %}
+        <div id="auth-container">
+            <div id="login-form">
+                <h2>Login</h2>
+                <button id="google-login-btn" onclick="window.location.href='{{ url_for('google_login') }}'">
+                    Login with Google
+                </button>
+                <div class="manual-login">
+                    <input type="text" id="login-username" placeholder="Username">
+                    <input type="password" id="login-password" placeholder="Password">
+                    <button id="login-btn">Login</button>
+                </div>
+                <p>Don't have an account? <a href="#" id="show-register">Register</a></p>
+            </div>
+            
+            <div id="register-form" class="hidden">
+                <h2>Register</h2>
+                <input type="text" id="register-username" placeholder="Username">
+                <input type="password" id="register-password" placeholder="Password">
+                <button id="register-btn">Register</button>
+                <p>Already have an account? <a href="#" id="show-login">Login</a></p>
+            </div>
+        </div>
+        {% else %}
+        <div id="user-info">
+            <div class="user-profile">
+                {% if session.get('picture') %}
+                <img src="{{ session.get('picture') }}" alt="Profile Picture" class="profile-pic">
+                {% endif %}
+                <div class="user-details">
+                    <p>Welcome, {{ session.get('name', session.get('username')) }}!</p>
+                    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+                </div>
+            </div>
+        </div>
+        
+        <div id="menu">
+            <div class="menu-options">
+                <h2>Choose Game Mode</h2>
+                <button id="singleplayer-btn">Single Player</button>
+                <button id="create-game-btn">Host Multiplayer Game</button>
+                <div class="join-game">
+                    <input type="text" id="room-code" placeholder="Enter room code">
+                    <button id="join-game-btn">Join Game</button>
+                </div>
+                {% if session.get('user_type') == 'admin' %}
+                <div id="tournament-section">
+                    <h2>Tournament Options</h2>
+                    <button id="create-tournament-btn">Create Tournament</button>
+                    <button id="view-tournaments-btn">View Active Tournaments</button>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div id="leaderboard" class="leaderboard">
+                <h2>Top Scores</h2>
+                <ul id="scores-list"></ul>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div id="tournament-form" class="hidden">
+            <h2>Create Tournament</h2>
+            <div>
+                <label for="start-date">Start Date:</label>
+                <input type="datetime-local" id="start-date">
+            </div>
+            <div>
+                <label for="end-date">End Date:</label>
+                <input type="datetime-local" id="end-date">
+            </div>
+            <button id="submit-tournament">Create</button>
+            <button id="cancel-tournament">Cancel</button>
+        </div>
+        
+        <div id="active-tournaments" class="hidden">
+            <h2>Active Tournaments</h2>
+            <ul id="tournaments-list"></ul>
+            <button id="back-to-menu">Back to Menu</button>
+        </div>
+        
+        <div id="game-container" class="hidden">
+            <div id="game-info">
+                <div id="score-display">Score: 0</div>
+                <div id="level-display">Level: 1</div>
+                <div id="next-piece">
+                    <h3>Next Piece</h3>
+                    <div id="next-piece-display"></div>
+                </div>
+                <div id="room-info" class="hidden">
+                    <h3>Room Code</h3>
+                    <div id="room-code-display">{{ room_id }}</div>
+                </div>
+            </div>
+            
+            <div id="game-board"></div>
+            
+            <div id="multiplayer-view" class="hidden">
+                <h3>Opponents</h3>
+                <div id="opponents-container"></div>
+            </div>
+        </div>
+        
+        <div id="game-over" class="hidden">
+            <h2>Game Over</h2>
+            <div id="final-score"></div>
+            <button id="save-score-btn">Save Score</button>
+            <button id="play-again-btn">Play Again</button>
+            <button id="return-menu-btn">Return to Menu</button>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

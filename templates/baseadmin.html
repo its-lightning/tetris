@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin - Tetris Multiplayer{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="page-wrapper">
+        <header>
+            <div class="header-container">
+                <div class="logo">
+                    <i class="fas fa-cube logo-icon"></i>
+                    <span class="logo-text">Tetris Multiplayer Admin</span>
+                </div>
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="{{ url_for('admin_dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</a></li>
+                        <li><a href="{{ url_for('add_tournament') }}" class="nav-link"><i class="fas fa-trophy"></i> Tournaments</a></li>
+                        <li><a href="{{ url_for('add_admin') }}" class="nav-link"><i class="fas fa-user-shield"></i> Admins</a></li>
+                        <li><a href="{{ url_for('logout') }}" class="nav-link logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    </ul>
+                    <button class="mobile-menu-btn">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </nav>
+            </div>
+        </header>
+        
+        <main>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for message in messages %}
+                            <div class="flash-message">
+                                <i class="fas fa-info-circle"></i>
+                                <span>{{ message }}</span>
+                                <button class="close-flash"><i class="fas fa-times"></i></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    
+    <script>
+        // Close flash messages
+        document.querySelectorAll('.close-flash').forEach(button => {
+            button.addEventListener('click', () => {
+                button.closest('.flash-message').remove();
+            });
+        });
+        
+        // Mobile menu toggle
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+        
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenuBtn.classList.toggle('active');
+                navLinks.classList.toggle('active');
+            });
+        }
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

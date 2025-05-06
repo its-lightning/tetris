@@ -1,0 +1,20 @@
+{% extends "baseadmin.html" %}
+
+{% block title %}Add Admin - Tetris Multiplayer{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Add Admin</h2>
+    <form method="POST" action="{{ url_for('add_admin') }}">
+        <div class="form-group">
+            <label for="username">Admin Username</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Admin Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn">Add Admin</button>
+    </form>
+</div>
+{% endblock %}

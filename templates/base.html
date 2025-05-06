@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tetris Multiplayer{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="page-wrapper">
+        <header>
+            <div class="header-container">
+                <div class="logo">
+                    <i class="fas fa-cube logo-icon"></i>
+                    <span class="logo-text">Tetris Multiplayer</span>
+                </div>
+                <nav>
+                    {% if session.user_id %}
+                    <ul class="nav-links">
+                        <li><a href="{{ url_for('dashboard') }}" class="nav-link"><i class="fas fa-home"></i> Dashboard</a></li>
+                        <li><a href="{{ url_for('singleplayer') }}" class="nav-link"><i class="fas fa-gamepad"></i> Play</a></li>
+                        <li><a href="{{ url_for('tournaments') }}" class="nav-link"><i class="fas fa-trophy"></i> Tournaments</a></li>
+                        <li><a href="{{ url_for('logout') }}" class="nav-link logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    </ul>
+                    {% else %}
+                    <ul class="nav-links">
+                        <li><a href="{{ url_for('login') }}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                        <li><a href="{{ url_for('signup') }}" class="nav-link highlight"><i class="fas fa-user-plus"></i> Sign Up</a></li>
+                    </ul>
+                    {% endif %}
+                    <button class="mobile-menu-btn">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </nav>
+            </div>
+        </header>
+        
+        <main>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for message in messages %}
+                            <div class="flash-message">
+                                <i class="fas fa-info-circle"></i>
+                                <span>{{ message }}</span>
+                                <button class="close-flash"><i class="fas fa-times"></i></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </main>
+        
+        <!-- <footer>
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-cube"></i>
+                    <span>Tetris Multiplayer</span>
+                </div>
+                <div class="footer-links">
+                    <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
+                </div>
+                <p class="copyright">&copy; 2025 Tetris Multiplayer. All rights reserved.</p>
+            </div>
+        </footer> -->
+    </div>
+    
+    <script>
+        // Close flash messages
+        document.querySelectorAll('.close-flash').forEach(button => {
+            button.addEventListener('click', () => {
+                button.closest('.flash-message').remove();
+            });
+        });
+        
+        // Mobile menu toggle
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+        
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenuBtn.classList.toggle('active');
+                navLinks.classList.toggle('active');
+            });
+        }
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

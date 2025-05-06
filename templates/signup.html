@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Tetris Multiplayer{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="login-form-wrapper">
+        <div class="form-header">
+            <h2>Create Account</h2>
+            <p class="subtitle">Join the Tetris Multiplayer community</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('signup') }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <div class="input-with-icon">
+                    <i class="fa fa-user"></i>
+                    <input type="text" id="username" name="username" placeholder="Choose a username" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-with-icon">
+                    <i class="fa fa-envelope"></i>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-with-icon">
+                    <i class="fa fa-lock"></i>
+                    <input type="password" id="password" name="password" placeholder="Create a password" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="login-btn">Sign Up</button>
+        </form>
+        
+        <div class="signup-link">
+            <p>Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

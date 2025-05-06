@@ -1,0 +1,12 @@
+@app.route('/tournaments/<int:tournament_id>')
+def tournament_results(tournament_id):
+    tournament = Tournament.query.get_or_404(tournament_id)
+    
+    # Get top scores for this tournament
+    highscores = Highscore.query.filter_by(tournament_id=tournament_id)\
+        .join(Player)\
+        .order_by(Highscore.score.desc())\
+        .limit(20)\
+        .all()
+    
+    return render_template('tournament_results.html', tournament=tournament, highscores=highscores)

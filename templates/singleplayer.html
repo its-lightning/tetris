@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Play Tetris - Tetris Multiplayer{% endblock %}
+
+{% block head %}
+<style>
+    .game-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .game-board {
+        width: 300px;
+        height: 600px;
+        border: 2px solid var(--primary-color);
+        position: relative;
+        background-color: rgba(0, 0, 0, 0.8);
+        box-shadow: 0 0 20px rgba(197, 78, 87, 0.3);
+    }
+    
+    .game-info {
+        margin-left: 20px;
+        width: 200px;
+    }
+    
+    .next-piece {
+        width: 120px;
+        height: 120px;
+        border: 2px solid var(--primary-color);
+        margin-top: 10px;
+        background-color: rgba(0, 0, 0, 0.8);
+        box-shadow: 0 0 10px rgba(197, 78, 87, 0.2);
+    }
+    
+    .controls {
+        margin-top: 20px;
+        background: linear-gradient(145deg, rgba(20, 20, 20, 0.7), rgba(0, 0, 0, 0.9));
+        padding: 15px;
+        border-radius: 5px;
+        border: 1px solid rgba(197, 78, 87, 0.3);
+    }
+    
+    .controls h4 {
+        color: var(--text-light);
+        margin-top: 0;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--primary-color);
+    }
+    
+    .controls p {
+        margin: 5px 0;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+    
+    .score-panel {
+        background: linear-gradient(145deg, rgba(20, 20, 20, 0.7), rgba(0, 0, 0, 0.9));
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        margin-bottom: 20px;
+        border: 1px solid rgba(197, 78, 87, 0.3);
+        color: var(--text-light);
+    }
+    
+    .score, .level, .lines {
+        margin: 10px 0;
+        font-size: 1.1rem;
+    }
+    
+    .score span, .level span, .lines span {
+        color: var(--primary-color);
+        font-weight: bold;
+    }
+    
+    .next-piece-container h4 {
+        color: var(--text-light);
+        margin-bottom: 5px;
+    }
+    
+    #back-to-menu {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-top: 20px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        text-align: center;
+    }
+    
+    #back-to-menu:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    @media (max-width: 768px) {
+        .game-container {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .game-info {
+            margin-left: 0;
+            margin-top: 20px;
+            width: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="single-player-container">
+    
+    <div class="game-container">
+        <canvas class="game-board" id="game-board" width="300" height="600"></canvas>
+        
+        <div class="game-info">
+            <div class="score-panel">
+                <div class="score">Score: <span id="score">0</span></div>
+                <div class="level">Level: <span id="level">1</span></div>
+                <div class="lines">Lines: <span id="lines">0</span></div>
+            </div>
+            
+            <div class="next-piece-container">
+                <h4>Next Piece:</h4>
+                <canvas class="next-piece" id="next-piece" width="120" height="120"></canvas>
+            </div>
+            
+            <div class="controls">
+                <h4>Controls:</h4>
+                <p>Left/Right Arrow: Move piece</p>
+                <p>Up Arrow: Rotate piece</p>
+                <p>Down Arrow: Soft drop</p>
+                <p>Space: Hard drop</p>
+            </div>
+            
+            <button id="back-to-menu" class="btn">Back to Menu</button>
+        </div>
+    </div>
+    <input type="hidden" id="tournament-id" value="{{ tournament_id or '' }}">
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/rotation.js') }}"></script>
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM loaded, starting game");
+        initGame('game-board', 'next-piece', 'score', 'level', 'lines', true);
+        
+        document.getElementById('back-to-menu').addEventListener('click', function() {
+            window.location.href = '/dashboard';
+        });
+    });
+</script>
+{% endblock %}

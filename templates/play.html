@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block title %}Play Tetris - Multiplayer{% endblock %}
+
+{% block head %}
+<style>
+    main {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .play-container h2 {
+        margin-bottom: 20px;
+    }
+    
+    .game-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .player-section {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .game-board {
+        width: 300px;
+        height: 600px;
+        border: 2px solid #333;
+        position: relative;
+        background-color: #000;
+    }
+    
+    .player-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        width: 200px;
+    }
+    
+    .game-info {
+        padding: 10px;
+        background-color: #333;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        color: white;
+    }
+    
+    .next-piece {
+        width: 100px;
+        height: 100px;
+        border: 2px solid #333;
+        margin-top: 10px;
+        background-color: #000;
+    }
+    
+    .controls {
+        margin-top: 20px;
+    }
+    
+    .controls p {
+        margin: 5px 0;
+    }
+    
+    .opponent-container {
+        display: flex;
+        flex-direction: column;
+        width: 200px;
+        margin-left: 20px;
+    }
+    
+    .opponent-boards {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .opponent-board {
+        width: 150px;
+        height: 300px;
+        border: 2px solid #333;
+        position: relative;
+        background-color: #000;
+    }
+    
+    .opponent {
+        margin-bottom: 20px;
+    }
+    
+    .opponent-name {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .opponent-stats {
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="play-container">
+    <h2>Tetris Multiplayer - Room: {{ room_code }}</h2>
+    
+    <div class="game-container">
+        <div class="player-section">
+            <canvas class="game-board" id="game-board" width="300" height="600"></canvas>
+            
+            <div class="player-info">
+                <h3>Your Game</h3>
+                <div class="game-info">
+                    <div class="score">Score: <span id="score">0</span></div>
+                    <div class="level">Level: <span id="level">1</span></div>
+                    <div class="lines">Lines: <span id="lines">0</span></div>
+                    <div class="next-piece-container">
+                        <h4>Next Piece:</h4>
+                        <canvas class="next-piece" id="next-piece" width="100" height="100"></canvas>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <h4>Controls:</h4>
+                    <p>Left/Right Arrow: Move piece</p>
+                    <p>Up Arrow: Rotate piece</p>
+                    <p>Down Arrow: Soft drop</p>
+                    <p>Space: Hard drop</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="opponent-container">
+            <h3>Opponents</h3>
+            <div class="opponent-boards" id="opponent-boards"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js"></script>
+<script src="{{ url_for('static', filename='js/rotation.js') }}"></script>
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const roomCode = "{{ room_code }}";
+        const userId = {{ session.user_id|tojson }};
+        const isHost = {{ 'true' if is_host else 'false' }};
+        
+        console.log("Initializing multiplayer game");
+        console.log("Room code:", roomCode);
+        console.log("User ID:", userId);
+        console.log("Is host:", isHost);
+        
+        // Initialize game with multiplayer mode (false for singlePlayer parameter)
+        initGame('game-board', 'next-piece', 'score', 'level', 'lines', false);
+        
+        // Initialize socket connection
+        const socket = io();
+        
+        // Make socket globally available for game.js
+        window.socket = socket;
+        
+        // Game state update callback for multiplayer
+        window.onGameUpdate = function(gameState) {
+            if (socket && socket.connected) {
+                socket.emit('game_update', {
+                    room_code: roomCode,
+                    game_state: gameState
+                });
+            }
+        };
+        
+        // Game over callback
+        window.onGameOver = function(score) {
+            if (socket && socket.connected) {
+                socket.emit('game_over', {
+                    room_code: roomCode,
+                    score: score
+                });
+            }
+        };
+        
+        // Socket event handlers
+        socket.on('connect', function() {
+            console.log('Connected to server with socket ID:', socket.id);
+            
+            // Join the room immediately after connecting
+            socket.emit('join_room', { room_code: roomCode });
+            
+            // Request game state update if we're not the host
+            if (!isHost) {
+                socket.emit('request_game_state', { room_code: roomCode });
+            }
+        });
+        
+        socket.on('game_update', function(data) {
+            console.log('Game update from player:', data.player_id);
+            
+            // Update the opponent's board
+            if (typeof updateOpponentBoard === 'function') {
+                updateOpponentBoard(data.player_id, data.game_state, 'opponent-boards');
+            } else {
+                console.error('updateOpponentBoard function not found');
+            }
+        });
+        
+        socket.on('player_game_over', function(data) {
+            console.log('Player game over:', data);
+            
+            // Add "Game Over" overlay to the player's board
+            const opponentBoard = document.getElementById(`opponent-${data.player_id}`);
+            if (opponentBoard) {
+                const opponentCtx = opponentBoard.getContext('2d');
+                opponentCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                opponentCtx.fillRect(0, 0, opponentBoard.width, opponentBoard.height);
+                
+                opponentCtx.font = '14px Arial';
+                opponentCtx.fillStyle = 'white';
+                opponentCtx.textAlign = 'center';
+                opponentCtx.textBaseline = 'middle';
+                opponentCtx.fillText('GAME OVER', opponentBoard.width / 2, opponentBoard.height / 2);
+                opponentCtx.fillText(`Score: ${data.score}`, opponentBoard.width / 2, opponentBoard.height / 2 + 20);
+            }
+            
+            // Check if we're the last player standing
+            const activePlayers = document.querySelectorAll('.opponent-board').length;
+            if (activePlayers === 0 && !gameOver) {
+                // You win!
+                handleWin();
+            }
+        });
+        
+        socket.on('you_win', function() {
+            console.log('You win!');
+            handleWin();
+        });
+        
+        socket.on('new_game', function() {
+            console.log('Starting new game');
+            resetGame();
+        });
+        
+        socket.on('player_joined', function(data) {
+            console.log('Player joined:', data);
+        });
+        
+        socket.on('player_left', function(data) {
+            console.log('Player left:', data);
+            
+            // Remove the player's board if it exists
+            const opponentBoard = document.getElementById(`opponent-${data.player_id}`);
+            if (opponentBoard) {
+                opponentBoard.parentElement.remove();
+            }
+            
+            // Check if we're the last player standing
+            const activePlayers = document.querySelectorAll('.opponent-board').length;
+            if (activePlayers === 0 && !gameOver) {
+                // You win!
+                handleWin();
+            }
+        });
+        
+        socket.on('room_closed', function(data) {
+            alert(data.message);
+            window.location.href = '/dashboard';
+        });
+        
+        socket.on('error', function(data) {
+            alert('Error: ' + data.message);
+        });
+    });
+</script>
+{% endblock %}

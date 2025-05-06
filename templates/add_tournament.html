@@ -1,0 +1,28 @@
+{% extends "baseadmin.html" %}
+
+{% block title %}Add Tournament - Tetris Multiplayer{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Add Tournament</h2>
+    <form method="POST" action="{{ url_for('add_tournament') }}">
+        <div class="form-group">
+            <label for="name">Tournament Name</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="start_date">Start Date</label>
+            <input type="datetime-local" id="start_date" name="start_date" required>
+        </div>
+        <div class="form-group">
+            <label for="end_date">End Date</label>
+            <input type="datetime-local" id="end_date" name="end_date" required>
+        </div>
+        <button type="submit" class="btn">Add Tournament</button>
+    </form>
+</div>
+{% endblock %}
